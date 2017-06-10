@@ -19,7 +19,7 @@
 console.log('APIs initialize');
 
 const conversation = require('./message');
-
+console.log("test");
 module.exports = {
     'initialize': (app, options) => {
         conversation.initialize(app, options);

@@ -15,7 +15,7 @@
  */
 
  'use strict';
- 
+
 const Conversation = require('watson-developer-cloud/conversation/v1'); // watson sdk
 const config = require('../util/config');
 
@@ -23,6 +23,8 @@ const config = require('../util/config');
 let conversation = new Conversation(config.conversation);
 
 let getConversationResponse = (message, context) => {
+  // console.log("[DEBUG]: "+message);
+  // console.log("[DEBUG]: "+context);
   let payload = {
     workspace_id: process.env.WORKSPACE_ID,
     context: context || {},
@@ -33,7 +35,13 @@ let getConversationResponse = (message, context) => {
 
   return new Promise((resolved, rejected) => {
     // Send the input to the conversation service
-    // TODO : To be implemented
+    conversation.message(payload, function(err, data) {
+      if (err) {
+        rejected(err);
+      }
+      console.log("data: "+data);
+      resolved(postProcess(data));
+    });
   })
 }
 
@@ -47,25 +55,25 @@ let postMessage = (req, res) => {
   });
 }
 
-/** 
+/**
 * 사용자의 메세지를 Watson Conversation 서비스에 전달하기 전에 처리할 코드
 * @param  {Object} user input
-*/ 
+*/
 let preProcess = payload => {
-  var inputText = payload.input.text; 
+  var inputText = payload.input.text;
   console.log("User Input : " + inputText);
-  console.log("Processed Input : " + inputText); 
+  console.log("Processed Input : " + inputText);
   console.log("--------------------------------------------------");
 
   return payload;
 }
 
-/** 
- * Watson Conversation 서비스의 응답을 사용자에게 전달하기 전에 처리할 코드 
- * @param  {Object} watson response 
- */ 
+/**
+ * Watson Conversation 서비스의 응답을 사용자에게 전달하기 전에 처리할 코드
+ * @param  {Object} watson response
+ */
 
-let postProcess = response => { 
+let postProcess = response => {
   console.log("Conversation Output : " + response.output.text);
   console.log("--------------------------------------------------");
   if(response.context && response.context.action){
@@ -74,12 +82,13 @@ let postProcess = response => {
   return response;
 }
 
-/** 
+/**
  * 대화 도중 Action을 수행할 필요가 있을 때 처리되는 함수
  * @param  {Object} data : response object
- * @param  {Object} action 
- */ 
+ * @param  {Object} action
+ */
 let doAction = (data, action) => {
+  console.log("[DEBUG]1");
   console.log("Action : " + action.command);
   switch(action.command){
     case "check-availability":
@@ -94,12 +103,13 @@ let doAction = (data, action) => {
   return data;
 }
 
-/** 
+/**
  * 회의실의 예약 가능 여부를 체크하는 함수
  * @param  {Object} data : response object
- * @param  {Object} action 
- */ 
+ * @param  {Object} action
+ */
 let checkAvailability = (data, action) => {
+  console.log("[DEBUG]2");
    //TODO
    return data;
 }
@@ -110,6 +120,7 @@ let checkAvailability = (data, action) => {
  * @param  {Object} action
  */
 let confirmReservation = (data, action) =>{
+  console.log("[DEBUG]3");
    //TODO
    return data;
 }
